@@ -1,0 +1,8 @@
+*.o
+*.s#*
+*.mcs
+*.mcw
+*.map
+*.cof
+*.epf
+*.err
