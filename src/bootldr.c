@@ -26,7 +26,7 @@
 // Bootldr_TestHarness(void) - only used for testing.  Should not be in production
 //
 // ============================================================================
-
+#pragma code
 void Bootldr_Initialize(void)
 {
     // Initialize the bootldr structure
@@ -46,18 +46,79 @@ void Bootldr_Verify(void)
 void Bootldr_Program(void)
 {
     HexRecord currentRecord;
+    Bootloader bootLoader;
 
     // Open the data source
     open_source();
+    
+    // Erase the user program area
+    Bootldr_Erase();
+    
+    //Bootloader will start programming at the user program start address
+    bootLoader.start_address = USER_PROGRAM_START_ADDRESS;
+    bootLoader.end_address = bootLoader.start_address + PROGRAM_BLOCK_SIZE_IN_BYTES;
+    bootLoader.bytes_left = PROGRAM_BLOCK_SIZE_IN_BYTES;
+    initialize_buffer_data(&bootLoader);
 
     // Process each record in the data source.
     read_record(&currentRecord);
     while(currentRecord.RecordType != HR_EOF)
     {
-        // Load data into the programming buffer and write it out when full
+        if(currentRecord.RecordType == HR_DATA)
+        {
+            // Verify we are in the user program range
+            if((currentRecord.Address >= USER_PROGRAM_START_ADDRESS) && (currentRecord.Address < USER_PROGRAM_END_ADDRESS))
+            {
+                if(currentRecord.Address <= bootLoader.end_address)
+                {
+                    if(bootLoader.bytes_left >= currentRecord.ByteCount)
+                    {
+                        strncpy(bootLoader.data_buffer[currentRecord.Address - bootLoader.start_address], currentRecord.data, currentRecord.ByteCount);
+                        bootLoader.bytes_left -= currentRecord.ByteCount;
+                        read_record(&currentRecord);
+                    }
+                    else
+                    {
+                        // We need to split the data between two program blocks
+                        strncpy(bootLoader.data_buffer[currentRecord.Address - bootLoader.start_address], currentRecord.data, bootLoader.bytes_left);
+                        flash_write(bootLoader.data_buffer, bootLoader.start_address, PROGRAM_BLOCK_SIZE_IN_BYTES);
+                        
+                        // Move a block ahead
+                        bootLoader.start_address += PROGRAM_BLOCK_SIZE_IN_BYTES;
+                        bootLoader.end_address = bootLoader.start_address + PROGRAM_BLOCK_SIZE_IN_BYTES;
+                        initialize_buffer_data(&bootLoader);
+                        
+                        // Put the remaining data from the HexRecord in the buffer
+                        strncpy(bootLoader.data_buffer, currentRecord.data[bootLoader.bytes_left], currentRecord.ByteCount - bootLoader.bytes_left);
+                        bootLoader.bytes_left = PROGRAM_BLOCK_SIZE_IN_BYTES - (currentRecord.ByteCount - bootLoader.bytes_left);
+                        read_record(&currentRecord);
+                    }
+                }
+                else
+                {
+                    // Write what we've got in the buffer
+                    flash_write(bootLoader.data_buffer, bootLoader.start_address, PROGRAM_BLOCK_SIZE_IN_BYTES);
+                    bootLoader.bytes_left = PROGRAM_BLOCK_SIZE_IN_BYTES;
+                    initialize_buffer_data(&bootLoader);
+                    
+                    // Set the program block address
+                    bootLoader.start_address = currentRecord.Address & BLOCK_ALIGN_CONSTANT;
+                    bootLoader.end_address = bootLoader.start_address + PROGRAM_BLOCK_SIZE_IN_BYTES;
+                }
+            }
+            else
+            {
+                read_record(&currentRecord);
+            }
+        }
+        else
+        {
+            // Any other record type is either handled in the parser or ignored
+            read_record(&currentRecord);
+        }
 
         // Get the next record
-        read_record(&currentRecord);
+        //read_record(&currentRecord);
     }
 
     // Close/cleanup the data source
@@ -242,4 +303,13 @@ void flash_commit(void)
 
     while(EECON1bits.WR);   //Wait until complete (relevant when programming EEPROM, not important when programming flash since processor stalls during flash program)
     INTCONbits.GIE = 1;     // Re-enable interrupts
+}
+
+void initialize_buffer_data(Bootloader *bootldr)
+{
+    UINT08 i = 0;
+    for(i = 0; i < PROGRAM_BLOCK_SIZE_IN_BYTES; i++)
+    {
+        bootldr->data_buffer[i] = 0xFF;
+    }
 }

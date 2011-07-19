@@ -42,6 +42,9 @@
 
 void main (void)
 {
+    //TODO: Determine whether or not it's bootloader mode and react accordingly
+    //TODO: Remap reset and interrupt vectors
+    
     Bootldr_Program();
 	while(1);
 }

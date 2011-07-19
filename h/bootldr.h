@@ -11,6 +11,7 @@
 #define USER_PROGRAM_START_ADDRESS      0x8000UL
 #define USER_PROGRAM_END_ADDRESS        0x1FFF7UL
 #define NUM_BLOCKS_TO_ERASE             95
+#define BLOCK_ALIGN_CONSTANT            0b01000000
 
 enum HexRecordType
 {
@@ -24,14 +25,20 @@ enum HexRecordType
 typedef enum HexRecordType HexRecordType;
 
 
-typedef struct bootldr bootldr;
+// ============================================================================
+// BOOTLOADER STRUCTURE
+//
+// data_buffer - holds the data to be written to program memory
+// start_address - the beginning address of the current block being programmed
+// end_address - the ending address of the current block being programmed
+// ============================================================================
+typedef struct bootldr Bootloader;
 struct bootldr
 {
-    // bootldr members
     char data_buffer[PROGRAM_BLOCK_SIZE_IN_BYTES];
-    UINT08 numberOfBytesInBuffer;
-    UINT24 currentAddress;
-    UINT16 addressUpperWord;
+    UINT24 start_address;
+    UINT24 end_address;
+    UINT08 bytes_left;
 };
 
 typedef struct HexRecord HexRecord;
@@ -57,6 +64,7 @@ BOOL Bootldr_TestHarness(void);
 
 // Supporting functions
 void flash_commit(void);
+void initialize_buffer_data(Bootloader *bootldr);
 
 
 // Platform specific functions that need to be implemented

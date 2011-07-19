@@ -99,14 +99,7 @@ void close_source(void)
 BOOL parse_hex_line(CHAR *data, HexRecord* record)
 {
 	UINT24 temp = 0;
-//struct HexRecord
-//{
-//    UINT08 ByteCount;
-//    UINT24 Address;
-//    enum HexRecordType RecordType;
-//    char data[MAX_HEX_PAYLOAD_SIZE_IN_BYTES];
-//    BYTE Checksum;
-//};
+
 	// Initialize record
 	record->ByteCount = 0;
 	record->Address = currentHighAddress;
@@ -142,7 +135,14 @@ BOOL parse_hex_line(CHAR *data, HexRecord* record)
 		
 		// If the record type is an Extended Linear Address Record
 		// then let's set the currentHighAddress variable here
-		// TODO: set currentHighAddress
+		if(record->RecordType == HR_EXT_LINEAR_ADDRESS)
+        {
+            currentHighAddress = 0;
+            currentHighAddress += (record->data[0] << 28);
+		    currentHighAddress += (record->data[1] << 24);
+		    currentHighAddress += (record->data[2] << 20);
+		    currentHighAddress += (record->data[3] << 16);
+        }
 	}
 	else
 		return FALSE;
@@ -161,6 +161,7 @@ BOOL parse_hex_line(CHAR *data, HexRecord* record)
 // ============================================================================
 UINT16 convert_hex_digit(CHAR hexCharacter)
 {
+    //TODO: Increase the efficiency and reduce code of convert_hex_digit()
 	UINT08 ret = -1;
 	switch(hexCharacter)
 	{
@@ -300,7 +301,7 @@ void str2ram(static CHAR *dest, static CHAR rom *src)
 
 CHAR* get_fake_hex_line()
 {
-	static CHAR line[30];
+	static CHAR line[50];
 	str2ram(line, table[hexIndex++]);
 
 	return line;

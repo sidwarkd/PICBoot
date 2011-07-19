@@ -17,6 +17,7 @@
 #define TEST
 
 #include "p18f27j53.h"
+#include "string.h"
 #include "app.h"
 #include "cpu.h"
 #include "bootldr.h"
