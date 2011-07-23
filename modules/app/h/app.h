@@ -1,7 +1,7 @@
 // FILE:		app.h
 // AUTHOR: 		Kevin Sidwar
-// DESCRIPTION:         Main header file for the PICBoot application.  Define
-//                      all application level items here.
+// DESCRIPTION: Main header file for the PICBoot application.  Define
+//              all application level items here.
 //
 // LICENSE:		see main.c for license info
 // CHANGELOG:
@@ -14,6 +14,12 @@
 // FUNCTION PROTOTYPES
 void HighPriorityISRCode();
 void LowPriorityISRCode();
+
+// GLOBAL DEFINES
+#define TRUE    1;
+#define FALSE   0;
+#define ENABLE  1;
+#define DISABLE 0;
 
 #endif	/* APP_H */
 

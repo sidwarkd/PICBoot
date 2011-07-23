@@ -1,6 +1,6 @@
 // FILE:		main.c
 // AUTHOR: 		Kevin Sidwar
-// DESCRIPTION:         Main entry point for the bootloader application
+// DESCRIPTION: Main entry point for the bootloader application
 
 // LICENSE:		http://creativecommons.org/licenses/by-nc-sa/3.0/
 // CHANGELOG:
@@ -11,7 +11,10 @@
 
 // C O N F I G U R A T I O N
 // Note: For a complete list of the available config pragmas and their values,
-// see the compiler documentation.
+// see the compiler documentation.  These config bits are not changeable by
+// the user program because that could potentially break the behavior of the 
+// bootloader.  If necessary, most of these settings can be modified 
+// programmatically in the user program.
 
 #pragma config WDTEN	= OFF		// Watchdog disabled
 #pragma config PLLDIV	= 2		// 8 MHz crystal
@@ -38,13 +41,24 @@
 #pragma config WPDIS	= OFF		// WPCFG bits ignored
 #pragma config LS48MHZ	= SYS48X8
 
-#pragma code
-
 void main (void)
 {
+    #ifndef TEST
     //TODO: Determine whether or not it's bootloader mode and react accordingly
     //TODO: Remap reset and interrupt vectors
+    LCD_WriteFromROM("Starting App");
     
-    Bootldr_Program();
-	while(1);
+    #else
+    LCD_WriteFromROM("Test Mode");
+    if(Bootldr_TestHarness())
+	{
+        ClrWdt();
+        while(1);
+	}
+    else
+	{
+        Sleep();
+        while(1);
+	}
+	#endif
 }

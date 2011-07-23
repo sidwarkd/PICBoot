@@ -9,9 +9,9 @@
 #define MAX_HEX_PAYLOAD_SIZE_IN_BYTES   32
 #define ERASE_BLOCK_SIZE_IN_BYTES       1024
 #define USER_PROGRAM_START_ADDRESS      0x8000UL
-#define USER_PROGRAM_END_ADDRESS        0x1FFF7UL
+#define USER_PROGRAM_END_ADDRESS        0x1FFF8UL
 #define NUM_BLOCKS_TO_ERASE             95
-#define BLOCK_ALIGN_CONSTANT            0b01000000
+#define BLOCK_ALIGN_CONSTANT            0xFFFFC0UL
 
 enum HexRecordType
 {
@@ -38,7 +38,6 @@ struct bootldr
     char data_buffer[PROGRAM_BLOCK_SIZE_IN_BYTES];
     UINT24 start_address;
     UINT24 end_address;
-    UINT08 bytes_left;
 };
 
 typedef struct HexRecord HexRecord;
@@ -54,7 +53,7 @@ struct HexRecord
 // Bootloader function prototypes
 void Bootldr_Initialize(void);
 void Bootldr_Erase(void);
-void Bootldr_Verify(void);
+BOOL Bootldr_Verify(void);
 void Bootldr_Program(void);
 
 #ifdef TEST
@@ -65,6 +64,7 @@ BOOL Bootldr_TestHarness(void);
 // Supporting functions
 void flash_commit(void);
 void initialize_buffer_data(Bootloader *bootldr);
+void strncpy(CHAR *dest, CHAR *src, UINT08 count);
 
 
 // Platform specific functions that need to be implemented

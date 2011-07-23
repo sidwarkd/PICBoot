@@ -1,7 +1,7 @@
 // FILE:		cpu.h
 // AUTHOR: 		Kevin Sidwar
-// DESCRIPTION:         Processor specific datatypes should be defined here for
-//                      portablility reasons.
+// DESCRIPTION: Processor specific datatypes should be defined here for
+//              portablility reasons.
 
 // LICENSE:		see main.c for license info
 // CHANGELOG:
@@ -21,11 +21,6 @@ typedef unsigned char       BYTE;
 typedef unsigned char       BOOL;
 
 typedef char				CHAR;
-
-#define TRUE    1;
-#define FALSE   0;
-#define ENABLE  1;
-#define DISABLE 0;
 
 #endif	/* CPU_H */
 
