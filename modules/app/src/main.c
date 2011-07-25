@@ -44,21 +44,44 @@
 void main (void)
 {
     #ifndef TEST
+	InitializeApplication();
     //TODO: Determine whether or not it's bootloader mode and react accordingly
     //TODO: Remap reset and interrupt vectors
     LCD_WriteFromROM("Starting App");
+	while(1);
     
     #else
+	InitializeApplication();
     LCD_WriteFromROM("Test Mode");
     if(Bootldr_TestHarness())
 	{
-        ClrWdt();
+        LCD_WriteFromROM("\r\nPASS");
         while(1);
 	}
     else
 	{
-        Sleep();
+        LCD_WriteFromROM("\r\nFAILED");
         while(1);
 	}
 	#endif
+}
+
+void InitializeApplication()
+{
+	ADCON0 = 0x00;
+	ADCON1 = 0x0F;  	// Make all pins digital
+	ANCON0 = 0xFF;
+	ANCON1 = 0xFF;
+	LATA = 0x00;
+	LATB = 0x00;
+	LATC = 0x00;
+	LATCbits.LATC0 = 1; // Initial state for lcd
+	LATCbits.LATC1 = 1; // Initial state for lcd
+	TRISA = 0x00;
+	TRISB = 0x00;
+	TRISC = 0x00;
+
+	LCD_Initialize();
+
+	DelayMS(20);
 }

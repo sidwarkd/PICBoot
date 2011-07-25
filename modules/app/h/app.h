@@ -12,8 +12,9 @@
 #define	APP_H
 
 // FUNCTION PROTOTYPES
-void HighPriorityISRCode();
-void LowPriorityISRCode();
+void HighPriorityISRCode(void);
+void LowPriorityISRCode(void);
+void InitializeApplication(void);
 
 // GLOBAL DEFINES
 #define TRUE    1;
