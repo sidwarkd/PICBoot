@@ -1,3 +1,5 @@
+#include "INCLUDES.h"
+
 #pragma config WDTEN	= OFF		// Watchdog disabled
 #pragma config PLLDIV	= 2		// 8 MHz crystal
 #pragma config CFGPLLEN = ON		// PLL Enabled
@@ -82,8 +84,62 @@ void YourLowPriorityISRCode()
 	//Etc.
 }	//This return will be a "retfie", since this is in a #pragma interruptlow section 
 
+//#define DOUBLE
+
 #pragma code
-void main(void)
+
+void DelayMS(short x)
 {
-	return 0;
+	while(x--)Delay100TCYx(40);
 }
+
+void DelayS(short x)
+{
+	short i = 0;
+	for(i = 0; i < x; i++)
+	{
+		DelayMS(1000);
+	}
+}
+
+void InitializeApplication()
+{    
+	ADCON0 = 0x00;
+	ADCON1 = 0x0F;  	// Make all pins digital
+	ANCON0 = 0xFF;
+	ANCON1 = 0xFF;
+	LATA = 0x00;
+	LATB = 0x00;
+	LATC = 0x00;
+	TRISA = 0x00;
+	TRISB = 0x00;
+	TRISC = 0x00;
+}
+
+void main (void)
+{
+	InitializeApplication();
+    LATAbits.LATA0 = 0;
+	while(1)
+	{
+		#ifndef DOUBLE
+		LATAbits.LATA0 = 1;
+		DelayMS(200);
+		LATAbits.LATA0 = 0;
+		DelayS(1);
+		
+		#else
+		LATAbits.LATA0 = 1;
+		DelayMS(200);
+		LATAbits.LATA0 = 0;
+		DelayMS(200);
+		LATAbits.LATA0 = 1;
+		DelayMS(200);
+		LATAbits.LATA0 = 0;
+		DelayS(1);
+		#endif
+	}
+}
+
+
+

@@ -21,6 +21,7 @@
 void LCD_Initialize(void);
 void LCD_WriteFromROM(const rom CHAR *data);
 void LCD_WriteFromRAM(const ram CHAR *data);
+void LCD_ClearScreen(void);
 void WriteLCDSPIByte(CHAR b);
 void DelayMS(UINT08);
 #endif

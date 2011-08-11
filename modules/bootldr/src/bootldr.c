@@ -103,14 +103,14 @@ void Bootldr_Program(void)
                 {
                     if((currentRecord.Address + currentRecord.ByteCount) <= bootLoader.end_address)
                     {
-                        strncpy(&bootLoader.data_buffer[currentRecord.Address - bootLoader.start_address], currentRecord.data, currentRecord.ByteCount);
+                        mystrncpy(&bootLoader.data_buffer[currentRecord.Address - bootLoader.start_address], currentRecord.data, currentRecord.ByteCount);
                         read_record(&currentRecord);
                     }
                     else
                     {
                         // We need to split the data between two program blocks
                         bytesWritten = bootLoader.end_address - currentRecord.Address;
-                        strncpy(&bootLoader.data_buffer[currentRecord.Address - bootLoader.start_address], currentRecord.data, bytesWritten);
+                        mystrncpy(&bootLoader.data_buffer[currentRecord.Address - bootLoader.start_address], currentRecord.data, bytesWritten);
                         flash_write(bootLoader.data_buffer, bootLoader.start_address, PROGRAM_BLOCK_SIZE_IN_BYTES);
                         
                         // Move a block ahead
@@ -119,7 +119,7 @@ void Bootldr_Program(void)
                         initialize_buffer_data(&bootLoader);
 						
                         // Put the remaining data from the HexRecord in the buffer
-                        strncpy(bootLoader.data_buffer, &currentRecord.data[bytesWritten], currentRecord.ByteCount - bytesWritten);
+                        mystrncpy(bootLoader.data_buffer, &currentRecord.data[bytesWritten], currentRecord.ByteCount - bytesWritten);
                         read_record(&currentRecord);
                     }
                 }
@@ -320,7 +320,7 @@ void initialize_buffer_data(Bootloader *bootldr)
     }
 }
 
-void strncpy(CHAR *dest, CHAR *src, UINT08 count)
+void mystrncpy(CHAR *dest, CHAR *src, UINT08 count)
 {
     UINT08 i;
     for(i = 0; i < count; i++)

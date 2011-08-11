@@ -19,7 +19,7 @@ typedef unsigned char       UINT08;
 
 // These types must be 8-bit
 typedef unsigned char       BYTE;
-typedef signed char			CHAR;
+typedef signed char 		CHAR;
 typedef unsigned char       UCHAR;
 
 // These types must be 16-bit

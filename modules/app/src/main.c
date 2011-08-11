@@ -41,13 +41,80 @@
 #pragma config WPDIS	= OFF		// WPCFG bits ignored
 #pragma config LS48MHZ	= SYS48X8
 
+void HighPriorityISRCode();
+void LowPriorityISRCode();
+
+/** V E C T O R  R E M A P P I N G *******************************************/
+
+#pragma code HIGH_INTERRUPT_VECTOR = 0x08
+void Remapped_High_ISR (void)
+{
+     _asm goto HighPriorityISRCode _endasm
+}
+#pragma code LOW_INTERRUPT_VECTOR = 0x18
+void Remapped_Low_ISR (void)
+{
+     _asm goto LowPriorityISRCode _endasm
+}
+#pragma code
+		
+//These are your actual interrupt handling routines.
+#pragma interrupt HighPriorityISRCode
+void HighPriorityISRCode()
+{
+}
+
+#pragma interruptlow LowPriorityISRCode
+void LowPriorityISRCode()
+{		
+	// TMR2 Interrupt?
+	if( INTCONbits.TMR0IF && INTCONbits.TMR0IE )
+	{
+		// Clear Interruptflag
+		INTCONbits.TMR0IF = 0;		
+		disk_timerproc();
+	}	
+}
+
 void main (void)
 {
     #ifndef TEST
+    CHAR *line;
+	
 	InitializeApplication();
+	
+	// Check for the bootloader switch
+	if(BOOTLDR_SWITCH == SWITCH_ON)
+	{
+	    Bootldr_Initialize();
+	    LCD_WriteFromROM("Program:");
+        Bootldr_Program();
+	    LCD_WriteFromROM("DONE");
+	    LCD_WriteFromROM("\n\rVerify:");
+	    if(Bootldr_Verify())
+	    {
+            LCD_WriteFromROM("PASS");
+            //while(1);
+	    }
+        else
+	    {
+            LCD_WriteFromROM("FAIL");
+            //while(1);
+	    }
+	    SDCARD_Dispose();
+	}
+	else
+	{
+	    // Go to the user application
+	    _asm
+	    goto USER_PROGRAM_START_ADDRESS
+	    _endasm
+	}
+
     //TODO: Determine whether or not it's bootloader mode and react accordingly
     //TODO: Remap reset and interrupt vectors
-    LCD_WriteFromROM("Starting App");
+
+    
 	while(1);
     
     #else
@@ -68,6 +135,8 @@ void main (void)
 
 void InitializeApplication()
 {
+    BOOL result;
+    
 	ADCON0 = 0x00;
 	ADCON1 = 0x0F;  	// Make all pins digital
 	ANCON0 = 0xFF;
@@ -75,13 +144,38 @@ void InitializeApplication()
 	LATA = 0x00;
 	LATB = 0x00;
 	LATC = 0x00;
-	LATCbits.LATC0 = 1; // Initial state for lcd
-	LATCbits.LATC1 = 1; // Initial state for lcd
 	TRISA = 0x00;
 	TRISB = 0x00;
 	TRISC = 0x00;
-
+	
+	// Enable internal PORTB pull-ups
+    INTCON2bits.RBPU = 0;
+    
+    // Set up RA1 to be a switch
+    TRISAbits.TRISA1 = INPUT_PIN;
+    
+    // Setup the TIMR0 module and enable interrupts
+	T0CON = 0x43;
+	INTCONbits.TMR0IE = 1;
+	INTCON2bits.TMR0IP = 0;
+	RCONbits.IPEN = 1;
+	TMR0L = 0x00;
+	INTCONbits.GIEH = 1;	// Turn on high priority interrupts
+	INTCONbits.GIEL = 1;	// Turn on low priority interrupts
+	T0CONbits.TMR0ON = 1;
+    
+    result = SDCARD_Initialize();
 	LCD_Initialize();
+	
+	LCD_WriteFromROM("LCD: OK\r\n");
+	if(result == TRUE)
+	{
+	    LCD_WriteFromROM("SD: OK\r\n");
+	}
+	else
+	{
+	    LCD_WriteFromROM("SD: FAIL\r\n");
+	}
 
 	DelayMS(20);
 }

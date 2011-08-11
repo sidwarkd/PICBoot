@@ -38,7 +38,14 @@ void read_record(HexRecord *record)
 		parse_hex_line(get_fake_hex_line(), record);
 	#else
 		// Read a line from the hex file
-		parse_hex_line(data, record);
+		if(data = SDCARD_ReadLine())
+		{
+			parse_hex_line(data, record);
+		}
+		else
+		{
+			record->RecordType = HR_EOF;
+		}
 	#endif
 }
 
@@ -60,10 +67,13 @@ void read_record(HexRecord *record)
 void open_source(void)
 {
 	// Open file on SD card and initialize cursor to beginning
+	CHAR hexFile[13]={"platform.hex"};
 	currentHighAddress = 0;
 
 	#ifdef TEST
 		hexIndex = 0;
+	#else
+		SDCARD_OpenFile(hexFile);
 	#endif
 }
 
@@ -81,7 +91,7 @@ void open_source(void)
 // ============================================================================
 void close_source(void)
 {
-    // Close file on SD card
+    // Nothing needs to be done here with Petit FatFS
 }
 
 // ============================================================================

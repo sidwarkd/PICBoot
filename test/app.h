@@ -17,13 +17,10 @@ void LowPriorityISRCode(void);
 void InitializeApplication(void);
 
 // GLOBAL DEFINES
-#define ENABLE  1
-#define DISABLE 0
-#define OUTPUT_PIN  0
-#define INPUT_PIN   1
-
-#define BOOTLDR_SWITCH PORTAbits.RA1
-#define SWITCH_ON   0
+#define ENABLE  1;
+#define DISABLE 0;
+#define OUTPUT_PIN  0;
+#define INPUT_PIN   1;
 
 #endif	/* APP_H */
 

@@ -45,6 +45,12 @@ void LCD_WriteFromRAM(const ram CHAR *data)
 	}
 }
 
+void LCD_ClearScreen(void)
+{
+    // Restore Display
+    WriteLCDSPIByte((CHAR) 0x0C);
+}
+
 void WriteLCDSPIByte(CHAR b)
 {
 	CHAR BitCount = 8;

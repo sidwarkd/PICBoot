@@ -64,7 +64,7 @@ BOOL Bootldr_TestHarness(void);
 // Supporting functions
 void flash_commit(void);
 void initialize_buffer_data(Bootloader *bootldr);
-void strncpy(CHAR *dest, CHAR *src, UINT08 count);
+void mystrncpy(CHAR *dest, CHAR *src, UINT08 count);
 
 
 // Platform specific functions that need to be implemented

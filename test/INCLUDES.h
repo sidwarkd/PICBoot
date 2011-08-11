@@ -17,13 +17,7 @@
 //#define TEST
 
 #include "p18f27j53.h"
-#include "app.h"
-#include "cpu.h"
 #include "delays.h"
-#include "string.h"
-#include "../../bootldr/h/bootldr.h"
-#include "../../crystalfontz/h/lcd.h"
-#include "../../sdcard/h/sdcard.h"
 
 #endif	/* INCLUDES_H */
 
