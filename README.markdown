@@ -22,11 +22,13 @@ enhancements to the code.
 Features and Future Enhancement
 -------------------------------
 The current features of the PICBoot bootloader are few and far between:
+
 + Reads raw hex file produced by IDE.
 + Doesn't require any software or connection to a computer to program (field reprogrammable)
 + Implements a simple code protection mechanism to prevent user applications from overwriting the bootloader
 
 Here is my current wish list for enhancements and future capabilities:
+
 + Implement buffered reading of hex files. Reading hex files 1 byte at a time has a major speed impact.
 + Optimize and shorten the convert\_hex\_digit function in hexreader.c
 + Implement software flag to indicate mode instead of the switch state
