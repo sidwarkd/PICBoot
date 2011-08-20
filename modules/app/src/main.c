@@ -49,12 +49,26 @@ void LowPriorityISRCode();
 #pragma code HIGH_INTERRUPT_VECTOR = 0x08
 void Remapped_High_ISR (void)
 {
-     _asm goto HighPriorityISRCode _endasm
+    if(BOOTLDR_SWITCH != SWITCH_ON)
+    {
+        _asm goto USER_HIGH_INTERRUPT_ADDRESS _endasm
+    }
+    else
+    {
+        _asm goto HighPriorityISRCode _endasm
+    }
 }
 #pragma code LOW_INTERRUPT_VECTOR = 0x18
 void Remapped_Low_ISR (void)
 {
-     _asm goto LowPriorityISRCode _endasm
+	if(BOOTLDR_SWITCH != SWITCH_ON)
+	{
+		_asm goto USER_LOW_INTERRUPT_ADDRESS _endasm
+	}
+	else
+	{
+		_asm goto LowPriorityISRCode _endasm
+	}		
 }
 #pragma code
 		
@@ -76,6 +90,7 @@ void LowPriorityISRCode()
 	}	
 }
 
+#pragma code
 void main (void)
 {
     #ifndef TEST
@@ -87,33 +102,45 @@ void main (void)
 	if(BOOTLDR_SWITCH == SWITCH_ON)
 	{
 	    Bootldr_Initialize();
+		#ifdef LCD_H
 	    LCD_WriteFromROM("Program:");
+		#else
+		// Flash LED
+		#endif
         Bootldr_Program();
+		#ifdef LCD_H
 	    LCD_WriteFromROM("DONE");
 	    LCD_WriteFromROM("\n\rVerify:");
+		#endif
 	    if(Bootldr_Verify())
 	    {
+			#ifdef LCD_H
             LCD_WriteFromROM("PASS");
-            //while(1);
+			#else
+			#endif
 	    }
         else
 	    {
+			#ifdef LCD_H
             LCD_WriteFromROM("FAIL");
-            //while(1);
+			#else
+			#endif
 	    }
 	    SDCARD_Dispose();
 	}
 	else
 	{
+	    // Disable the TIMR interrupt
+	    INTCONbits.TMR0IE = 0;
+	    INTCONbits.GIEH = 0;	// Turn off high priority interrupts
+	    INTCONbits.GIEL = 0;	// Turn off low priority interrupts
+	    T0CONbits.TMR0ON = 0;
+	    
 	    // Go to the user application
 	    _asm
 	    goto USER_PROGRAM_START_ADDRESS
 	    _endasm
 	}
-
-    //TODO: Determine whether or not it's bootloader mode and react accordingly
-    //TODO: Remap reset and interrupt vectors
-
     
 	while(1);
     
@@ -162,20 +189,10 @@ void InitializeApplication()
 	TMR0L = 0x00;
 	INTCONbits.GIEH = 1;	// Turn on high priority interrupts
 	INTCONbits.GIEL = 1;	// Turn on low priority interrupts
-	T0CONbits.TMR0ON = 1;
-    
-    result = SDCARD_Initialize();
+
+	#ifdef LCD_H
 	LCD_Initialize();
-	
-	LCD_WriteFromROM("LCD: OK\r\n");
-	if(result == TRUE)
-	{
-	    LCD_WriteFromROM("SD: OK\r\n");
-	}
-	else
-	{
-	    LCD_WriteFromROM("SD: FAIL\r\n");
-	}
+	#endif
 
 	DelayMS(20);
 }

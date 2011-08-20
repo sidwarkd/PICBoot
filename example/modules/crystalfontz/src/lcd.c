@@ -27,7 +27,6 @@ void LCD_Initialize()
 	// Setup pins
 	LCD_CS = 1;
 	LCD_CLK = 1;
-	LCD_WriteFromROM("LCD: OK\r\n");
 }
 
 void LCD_WriteFromROM(const rom CHAR *data)

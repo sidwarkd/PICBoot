@@ -25,16 +25,10 @@
 // Bootldr_TestHarness(void) - only used for testing.  Should not be in production build
 //
 // ============================================================================
-
 #pragma code
 void Bootldr_Initialize(void)
 {
     // Perform any initialization here
-	// Turn on the timer that will call disk_timerproc
-	T0CONbits.TMR0ON = 1;
-    
-	// Initialize the SD Card
-    SDCARD_Initialize();
 }
 
 void Bootldr_Erase(void)
@@ -159,9 +153,6 @@ void Bootldr_Program(void)
             read_record(&currentRecord);
         }
     }
-
-	// Write what's in the buffer
-	flash_write(bootLoader.data_buffer, bootLoader.start_address, PROGRAM_BLOCK_SIZE_IN_BYTES);
 
     // Close/cleanup the data source
     close_source();
